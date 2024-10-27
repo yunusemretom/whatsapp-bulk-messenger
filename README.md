@@ -1,36 +1,101 @@
-# Whatsapp-Bulk-Messenger
 
-Whatsapp Bulk Messenger automates sending of messages via Whatsapp Web. The tool can you used to send whatsapp message in bulk. Program uses runs through a list of numbers provided in numbers.txt and then tries to send a prediefined (but templated) message to each number in the list. It can also read other columns from the number csv to populate template specific words and then send out a personalized message to the number
+# WhatsApp Bulk Messenger
 
-Note: The current program is limited to sending only TEXT message
+WhatsApp Bulk Messenger, birden fazla telefon numarasına tek bir mesaj göndermenizi sağlayan bir otomasyon sistemidir. Kullanıcılar, mesaj metinlerini ve telefon numaralarını ayrı metin dosyalarında saklayabilirken, görseller, videolar ve diğer dosya türleri için yalnızca dosya yollarını içeren bir kod dosyası kullanılmaktadır.
 
-Note: Another version of similar project is available which supports sending media and documents along with text. As per many requests, I have added a [video here](https://youtu.be/NNkAh5sLEok) demonstrating how the app works. Please reach out to me on [email](mailto:bagrianirudh@gmail.com) for more enquiry. Join the [google group here](https://groups.google.com/g/whatsapp-bulker/) and [telegram group here](https://t.me/whatsapp_bulker).
+## Özellikler
 
-**Note: ChromeWebDriver needs to be downloaded manually. Otherwise, it will give errors. Download link: https://googlechromelabs.github.io/chrome-for-testing/**
+- **Otomatik Mesaj Gönderimi**: Belirtilen telefon numaralarına tek bir tıklama ile mesaj gönderebilir.
+- **Medya Desteği**: JPG, PNG, PDF, ve MP4 gibi dosyaları mesajlarla birlikte gönderebilir.
+- **Kullanıcı Dostu Arayüz**: Tarayıcı üzerinde WhatsApp Web ile etkileşim sağlayarak kullanıcı dostu bir deneyim sunar.
 
-**_Extract the downloaded zip file and place it in the directory where the code is located._**
+## Gereksinimler
 
-# Requirements
+- Python 3.x
+- Selenium kütüphanesi
+- Chrome WebDriver
+- WhatsApp hesabı (Web üzerinden oturum açılmış olmalıdır)
 
-*  Python >= 3.6
-*  Chrome headless is installed by the program automatically
+## Kurulum
 
-# Setup
+1. **Gereksinimleri yükleyin**:
 
-1. Install python - >=v3.6
-2. Run `pip install -r requirements.txt`
+   ```bash
+   pip install selenium
+   ```
 
-# Steps
+2. **Chrome WebDriver'ı indirin**: [Chrome WebDriver](https://sites.google.com/chromium.org/driver/) sayfasından sisteminize uygun sürümü indirin ve `chromedriver.exe` dosyasını projenizin kök dizinine yerleştirin.
 
-1. Enter the message you want to send inside `message.txt` file.
-2. Enter the list of numbers line-separated in `numbers.txt` file.
-3. Run `python automator.py`.
-4. Once the program starts, you'll see the message in message.txt and count of numbers in the numbers.txt file.
-5. After a while, Chrome should pop-up and open web.whatsapp.com.
-6. Scan the QR code to login into whatsapp.
-7. Press `Enter` to start sending out messages.
-8. Sit back and relax!
+3. **Proje dosyalarını oluşturun**:
+   - `message.txt`: Göndermek istediğiniz mesajı bu dosyaya yazın.
+   - `numbers.txt`: Mesaj göndermek istediğiniz telefon numaralarını (ülke koduyla birlikte) her satıra bir numara gelecek şekilde yazın.
 
-### Funding
+4. **Medya dosyalarını yerleştirin**: Göndermek istediğiniz resim, video ve diğer medya dosyalarını projenizin kök dizininde tutun.
 
-If you like this app, I'd appreciate it if you could make a donation via [Buy Me a Coffee](https://www.buymeacoffee.com/anirudhbagri) or [PayPal.Me](https://paypal.me/AnirudhBagri?locale.x=en_GB).
+## Kullanım
+
+1. `bulk_messenger.py` dosyasını çalıştırın:
+
+   ```bash
+   python bulk_messenger.py
+   ```
+
+2. Tarayıcı açıldığında WhatsApp Web'e giriş yapın. (Bu işlemi bir kez yapmanız yeterlidir.)
+
+3. Giriş tamamlandığında, komut isteminde talimatları izleyin ve ENTER tuşuna basın.
+
+4. Mesaj gönderimi başlayacak ve gönderim durumu terminalde görüntülenecektir.
+
+## Örnek Kod
+
+Aşağıda temel kod yapısını görebilirsiniz:
+
+```python
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+import os
+import glob
+from time import sleep
+from urllib.parse import quote
+
+# Tarayıcı ayarları
+options = Options()
+options.add_experimental_option("excludeSwitches", ["enable-logging"])
+options.add_argument("--profile-directory=Default")
+options.add_argument("--user-data-dir=/var/tmp/chrome_user_data")
+options.add_argument('--start-maximized')
+
+# Mesaj ve numara dosyalarını oku
+with open("message.txt", "r", encoding="utf8") as f:
+    message = quote(f.read())
+
+with open("numbers.txt", "r") as f:
+    numbers = [line.strip() for line in f.readlines() if line.strip()]
+
+# Mesaj gönderimi işlemleri
+driver = webdriver.Chrome(service=webdriver.ChromeService(executable_path="chromedriver.exe"), options=options)
+driver.get('https://web.whatsapp.com')
+input("Whatsapp Web'e giriş tamamlandıktan sonra ENTER tuşuna basın...")
+
+for number in numbers:
+    # Mesaj gönderim kodu buraya gelecek
+    # ...
+```
+
+## Lisans
+
+Bu proje, [MIT Lisansı](LICENSE) altında lisanslanmıştır.
+
+## İletişim
+
+Proje ile ilgili sorularınız için [email@example.com](mailto:email@example.com) adresi üzerinden iletişime geçebilirsiniz.
+
+---
+
+**Not**: Bu sistemin kullanımı, WhatsApp'ın kullanım şartlarına uygun olmalıdır. Spam gönderimi veya izinsiz mesaj gönderimi yasaktır.
+```
+
+Bu README dosyası, projenin özelliklerini, kurulum ve kullanım talimatlarını, örnek kodları içermekte ve okuyucuların kolayca anlayabilmesi için yapılandırılmıştır. İstediğin gibi düzenlemeler yapabilirsin.

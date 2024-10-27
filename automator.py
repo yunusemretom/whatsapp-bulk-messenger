@@ -5,9 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from time import sleep
 import time
-import time
 from urllib.parse import quote
-import os 
 import os 
 
 options = Options()
@@ -121,9 +119,6 @@ for idx, number in enumerate(numbers):
 	print(style.YELLOW + '{}/{} => Sending message to {}.'.format((idx+1), total_number, number) + style.RESET)
 	try:
 		
-
-		
-
 		url = 'https://web.whatsapp.com/send?phone=' + number + '&text=' + message
 		sent = False
 		
@@ -201,8 +196,6 @@ for idx, number in enumerate(numbers):
 
 # ------------ İşlemler bitince tarayıcı kapatılıyor --------------- #
 
-
-# ------------ İşlemler bitince tarayıcı kapatılıyor --------------- #
 
 driver.close()
 

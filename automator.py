@@ -5,7 +5,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from time import sleep
 import time
+import time
 from urllib.parse import quote
+import os 
 import os 
 
 options = Options()
@@ -45,15 +47,20 @@ class style():
 
 
 # ------- Mesajınızın bulunduğu dosya ------------#
+
+# ------- Mesajınızın bulunduğu dosya ------------#
 f = open("message.txt", "r", encoding="utf8")
 message = f.read()
 f.close()
 
 # ----- Burada mesajınızı gösterir --------#
+# ----- Burada mesajınızı gösterir --------#
 print(style.YELLOW + '\nThis is your message-')
 print(style.GREEN + message)
 print("\n" + style.RESET)
 message = quote(message)
+
+# --------- Burada göndermek istediğiniz numaları dosyadan çeker ---------- # 
 
 # --------- Burada göndermek istediğiniz numaları dosyadan çeker ---------- # 
 
@@ -66,8 +73,29 @@ f.close()
 
 # ----------- Burada Numara sayısını yani mesaj sayısını gösterir ----------- #
 
+
+# ----------- Burada Numara sayısını yani mesaj sayısını gösterir ----------- #
+
 total_number=len(numbers)
 print(style.RED + 'We found ' + str(total_number) + ' numbers in the file' + style.RESET)
+
+
+delay = 30 # Elemenlar bulmak için gereken süre 
+
+# ----- Burada tarayıcıyı açar ------- #
+svc = webdriver.ChromeService(executable_path="chromedriver.exe")
+driver = webdriver.Chrome(service=svc,options=options)
+
+print("Tarayıcınız açıldığında web whatsapp'ta oturum açın (bir kere yapmanız yeterli olacaktır.)")
+
+driver.get('https://web.whatsapp.com') # web whatsapp sitesine gidilir. 
+
+# -------- Burada whatsapp'a girdiğinizi onaylaylarsınız ------ #
+input(style.MAGENTA + "Whatsapp Web'e giriş tamamlandıktan ve sohbetleriniz görünür hale geldikten sonra ENTER tuşuna basın..." + style.RESET)
+
+
+# ---------------- Burada gönderme işlemleri yapılıyor ---------- #
+
 
 
 delay = 30 # Elemenlar bulmak için gereken süre 
@@ -92,6 +120,8 @@ for idx, number in enumerate(numbers):
 		continue
 	print(style.YELLOW + '{}/{} => Sending message to {}.'.format((idx+1), total_number, number) + style.RESET)
 	try:
+		
+
 		
 
 		url = 'https://web.whatsapp.com/send?phone=' + number + '&text=' + message
@@ -145,12 +175,14 @@ for idx, number in enumerate(numbers):
 					
 				except Exception as e:
 					print(e)
+					print(e)
 					print(style.RED + f"\nFailed to send message to: {number}, retry ({i+1}/3)")
 					print("Make sure your phone and computer is connected to the internet.")
 					print("If there is an alert, please dismiss it." + style.RESET)
 				else:
 					sleep(1)
 					click_btn.click()
+					time.sleep(2)
 					time.sleep(2)
 					sent=True
 					sleep(2)
@@ -163,8 +195,12 @@ for idx, number in enumerate(numbers):
 					print(style.GREEN + 'Yükleme tamamlandı.' + style.RESET)
 					print(style.GREEN + 'Message sent to: ' + number + style.RESET)
 
+
 	except Exception as e:
 		print(style.RED + 'Failed to send message to ' + number + str(e) + style.RESET)
+
+# ------------ İşlemler bitince tarayıcı kapatılıyor --------------- #
+
 
 # ------------ İşlemler bitince tarayıcı kapatılıyor --------------- #
 

@@ -91,7 +91,7 @@ Bu proje, [MIT Lisansı](LICENSE) altında lisanslanmıştır.
 
 ## İletişim
 
-Proje ile ilgili sorularınız için [email@example.com](mailto:email@example.com) adresi üzerinden iletişime geçebilirsiniz.
+Proje ile ilgili sorularınız için [yunusemretom@gmail.com](mailto:yunusemretom@gmail.com) adresi üzerinden iletişime geçebilirsiniz.
 
 ---
 
@@ -99,3 +99,6 @@ Proje ile ilgili sorularınız için [email@example.com](mailto:email@example.co
 ```
 
 Bu README dosyası, projenin özelliklerini, kurulum ve kullanım talimatlarını, örnek kodları içermekte ve okuyucuların kolayca anlayabilmesi için yapılandırılmıştır. İstediğin gibi düzenlemeler yapabilirsin.
+
+
+

@@ -71,9 +71,6 @@ f.close()
 
 # ----------- Burada Numara sayısını yani mesaj sayısını gösterir ----------- #
 
-
-# ----------- Burada Numara sayısını yani mesaj sayısını gösterir ----------- #
-
 total_number=len(numbers)
 print(style.RED + 'We found ' + str(total_number) + ' numbers in the file' + style.RESET)
 

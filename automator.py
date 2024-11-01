@@ -91,8 +91,6 @@ driver.get('https://web.whatsapp.com') # web whatsapp sitesine gidilir.
 # -------- Burada whatsapp'a girdiğinizi onaylaylarsınız ------ #
 input(style.MAGENTA + "Whatsapp Web'e giriş tamamlandıktan ve sohbetleriniz görünür hale geldikten sonra ENTER tuşuna basın..." + style.RESET)
 
-
-
 # ---------------- Burada gönderme işlemleri yapılıyor ---------- #
 
 for idx, number in enumerate(numbers):

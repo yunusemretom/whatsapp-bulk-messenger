@@ -92,23 +92,6 @@ driver.get('https://web.whatsapp.com') # web whatsapp sitesine gidilir.
 input(style.MAGENTA + "Whatsapp Web'e giriş tamamlandıktan ve sohbetleriniz görünür hale geldikten sonra ENTER tuşuna basın..." + style.RESET)
 
 
-# ---------------- Burada gönderme işlemleri yapılıyor ---------- #
-
-
-
-delay = 30 # Elemenlar bulmak için gereken süre 
-
-# ----- Burada tarayıcıyı açar ------- #
-svc = webdriver.ChromeService(executable_path="chromedriver.exe")
-driver = webdriver.Chrome(service=svc,options=options)
-
-print("Tarayıcınız açıldığında web whatsapp'ta oturum açın (bir kere yapmanız yeterli olacaktır.)")
-
-driver.get('https://web.whatsapp.com') # web whatsapp sitesine gidilir. 
-
-# -------- Burada whatsapp'a girdiğinizi onaylaylarsınız ------ #
-input(style.MAGENTA + "Whatsapp Web'e giriş tamamlandıktan ve sohbetleriniz görünür hale geldikten sonra ENTER tuşuna basın..." + style.RESET)
-
 
 # ---------------- Burada gönderme işlemleri yapılıyor ---------- #
 

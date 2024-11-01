@@ -44,21 +44,19 @@ class style():
     RESET = '\033[0m'
 
 
-# ------- Mesajınızın bulunduğu dosya ------------#
 
 # ------- Mesajınızın bulunduğu dosya ------------#
 f = open("message.txt", "r", encoding="utf8")
 message = f.read()
 f.close()
 
-# ----- Burada mesajınızı gösterir --------#
+
 # ----- Burada mesajınızı gösterir --------#
 print(style.YELLOW + '\nThis is your message-')
 print(style.GREEN + message)
 print("\n" + style.RESET)
 message = quote(message)
 
-# --------- Burada göndermek istediğiniz numaları dosyadan çeker ---------- # 
 
 # --------- Burada göndermek istediğiniz numaları dosyadan çeker ---------- # 
 

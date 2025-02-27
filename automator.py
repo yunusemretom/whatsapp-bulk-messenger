@@ -7,6 +7,8 @@ from time import sleep
 import time
 from urllib.parse import quote
 import os 
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 options = Options()
 options.add_experimental_option("excludeSwitches", ["enable-logging"])
@@ -76,8 +78,8 @@ print(style.RED + 'We found ' + str(total_number) + ' numbers in the file' + sty
 delay = 30 # Elemenlar bulmak için gereken süre 
 
 # ----- Burada tarayıcıyı açar ------- #
-svc = webdriver.ChromeService(executable_path="chromedriver.exe")
-driver = webdriver.Chrome(service=svc,options=options)
+
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 print("Tarayıcınız açıldığında web whatsapp'ta oturum açın (bir kere yapmanız yeterli olacaktır.)")
 

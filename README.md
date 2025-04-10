@@ -1,101 +1,104 @@
+# Otonom WhatsApp Toplu Mesaj Gönderme Uygulaması
 
-# WhatsApp Bulk Messenger
+Bu uygulama, WhatsApp Web üzerinden toplu mesaj göndermenizi sağlayan bir araçtır. Medya dosyaları ve özel mesajlar ekleyerek kişiselleştirilmiş mesajlar gönderebilirsiniz.
 
-WhatsApp Bulk Messenger, birden fazla telefon numarasına tek bir mesaj göndermenizi sağlayan bir otomasyon sistemidir. Kullanıcılar, mesaj metinlerini ve telefon numaralarını ayrı metin dosyalarında saklayabilirken, görseller, videolar ve diğer dosya türleri için yalnızca dosya yollarını içeren bir kod dosyası kullanılmaktadır.
+## 📦 Sürüm Bilgisi
+
+**v1.1.0** (2024-03-08)
+
+### Değişiklikler
+
+- ✨ **Yeni Özellikler**
+  - Her medya için özel mesaj tanımlama
+  - Medya mesajlarını yıldız işareti ile görüntüleme
+  - Ayarları otomatik kaydetme (delay, wait değerleri)
+  - Geçersiz numara kontrolü iyileştirildi
+
+- 🔧 **İyileştirmeler**
+  - Medya dosyaları ve ana mesaj ayrı ayrı gönderiliyor
+  - WhatsApp Web arayüz değişikliklerine karşı daha dayanıklı
+  - Daha hızlı geçersiz numara tespiti
+  - Numaralar artık settings.json dosyasına kaydedilmiyor
+
+- 🐛 **Hata Düzeltmeleri**
+  - Medya mesajları ve ana mesajın karışması sorunu çözüldü
+  - Medya yükleme sonrası input elementi değişikliği sorunu çözüldü
+  - Gereksiz bekleme süreleri optimize edildi
+
+## ⚠️ Sorumluluk Reddi
+
+Bu uygulama, WhatsApp'ın resmi bir uygulaması değildir ve WhatsApp tarafından desteklenmemektedir. Uygulamanın kullanımından doğabilecek her türlü sonuç kullanıcının sorumluluğundadır. Spam gönderimi, izinsiz mesaj gönderimi veya WhatsApp'ın kullanım şartlarına aykırı herhangi bir faaliyet için uygulama kullanılmamalıdır. Uygulamayı kullanarak, tüm yasal ve etik sorumlulukları kabul etmiş olursunuz.
 
 ## Özellikler
 
-- **Otomatik Mesaj Gönderimi**: Belirtilen telefon numaralarına tek bir tıklama ile mesaj gönderebilir.
-- **Medya Desteği**: JPG, PNG, PDF, ve MP4 gibi dosyaları mesajlarla birlikte gönderebilir.
-- **Kullanıcı Dostu Arayüz**: Tarayıcı üzerinde WhatsApp Web ile etkileşim sağlayarak kullanıcı dostu bir deneyim sunar.
-
-## Gereksinimler
-
-- Python 3.x
-- Selenium kütüphanesi
-- Chrome WebDriver
-- WhatsApp hesabı (Web üzerinden oturum açılmış olmalıdır)
+- 📱 Toplu WhatsApp mesajı gönderme
+- 📎 Medya dosyaları (resim, video, PDF) ekleme
+- 💬 Her medya için özel mesaj tanımlama
+- ⭐ Medya mesajlarını yıldız işareti ile görüntüleme
+- ⚙️ Ayarları otomatik kaydetme
+- 🔄 Geçersiz numara kontrolü
+- 📊 İlerleme durumu takibi
 
 ## Kurulum
 
-1. **Gereksinimleri yükleyin**:
-
-   ```bash
-   pip install selenium
+1. Python 3.8 veya üstü sürümü yükleyin
+2. Gerekli kütüphaneleri yükleyin:
    ```
-
-2. **Chrome WebDriver'ı indirin**: [Chrome WebDriver](https://sites.google.com/chromium.org/driver/) sayfasından sisteminize uygun sürümü indirin ve `chromedriver.exe` dosyasını projenizin kök dizinine yerleştirin.
-
-3. **Proje dosyalarını oluşturun**:
-   - `message.txt`: Göndermek istediğiniz mesajı bu dosyaya yazın.
-   - `numbers.txt`: Mesaj göndermek istediğiniz telefon numaralarını (ülke koduyla birlikte) her satıra bir numara gelecek şekilde yazın.
-
-4. **Medya dosyalarını yerleştirin**: Göndermek istediğiniz resim, video ve diğer medya dosyalarını projenizin kök dizininde tutun.
+   pip install -r requirements.txt
+   ```
+3. Uygulamayı başlatın:
+   ```
+   python main2.py
+   ```
 
 ## Kullanım
 
-1. `bulk_messenger.py` dosyasını çalıştırın:
+1. **Numara Ekleme**
+   - "Numara Ekle" butonu ile tek tek numara ekleyebilirsiniz
+   - "Numaraları İçe Aktar" ile txt dosyasından toplu numara ekleyebilirsiniz
+   - Numaraları ülke kodu ile birlikte girin (örn: 905551234567)
 
-   ```bash
-   python bulk_messenger.py
-   ```
+2. **Medya Dosyaları**
+   - "Dosya Ekle" butonu ile medya dosyaları ekleyebilirsiniz
+   - Her medya için özel mesaj yazabilirsiniz
+   - Mesaj eklenen medyalar yıldız işareti (⭐) ile gösterilir
+   - Medya mesajları otomatik olarak kaydedilir
 
-2. Tarayıcı açıldığında WhatsApp Web'e giriş yapın. (Bu işlemi bir kez yapmanız yeterlidir.)
+3. **Mesaj Gönderme**
+   - Ana mesaj kutusuna göndermek istediğiniz mesajı yazın
+   - Delay ve Wait sürelerini ayarlayın
+   - "Gönderimi Başlat" butonuna tıklayın
+   - İşlem durumunu "Durum" sekmesinden takip edin
 
-3. Giriş tamamlandığında, komut isteminde talimatları izleyin ve ENTER tuşuna basın.
+## Ayarlar
 
-4. Mesaj gönderimi başlayacak ve gönderim durumu terminalde görüntülenecektir.
+- **Delay**: Mesajlar arası bekleme süresi (saniye)
+- **Wait**: Elementlerin bulunması için gereken maksimum süre (saniye)
+- Ayarlar otomatik olarak kaydedilir ve uygulama yeniden başlatıldığında yüklenir
 
-## Örnek Kod
+## Güvenlik
 
-Aşağıda temel kod yapısını görebilirsiniz:
+- Numaralar settings.json dosyasına kaydedilmez
+- Medya mesajları ve ayarlar yerel olarak saklanır
+- WhatsApp Web oturumu kapatıldığında tüm veriler silinir
 
-```python
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-import os
-import glob
-from time import sleep
-from urllib.parse import quote
+## Ekran Görüntüleri
 
-# Tarayıcı ayarları
-options = Options()
-options.add_experimental_option("excludeSwitches", ["enable-logging"])
-options.add_argument("--profile-directory=Default")
-options.add_argument("--user-data-dir=/var/tmp/chrome_user_data")
-options.add_argument('--start-maximized')
+![Ana Ekran](imgs/OtonomWhatsapp1.png)
+![Medya Ekleme](imgs/OtonomWhatsapp2.png)
+![Mesaj Gönderme](imgs/OtonomWhatsapp3.png)
+![Durum Ekranı](imgs/OtonomWhatsapp4.png)
 
-# Mesaj ve numara dosyalarını oku
-with open("message.txt", "r", encoding="utf8") as f:
-    message = quote(f.read())
+## Gereksinimler
 
-with open("numbers.txt", "r") as f:
-    numbers = [line.strip() for line in f.readlines() if line.strip()]
-
-# Mesaj gönderimi işlemleri
-driver = webdriver.Chrome(service=webdriver.ChromeService(executable_path="chromedriver.exe"), options=options)
-driver.get('https://web.whatsapp.com')
-input("Whatsapp Web'e giriş tamamlandıktan sonra ENTER tuşuna basın...")
-
-for number in numbers:
-    # Mesaj gönderim kodu buraya gelecek
-    # ...
-```
+- Python 3.8+
+- PySide6
+- Selenium
+- Chrome WebDriver
 
 ## Lisans
 
-Bu proje, [MIT Lisansı](LICENSE) altında lisanslanmıştır.
-
-## İletişim
-
-Proje ile ilgili sorularınız için [yunusemretom@gmail.com](mailto:yunusemretom@gmail.com) adresi üzerinden iletişime geçebilirsiniz.
-
----
-
-**Not**: Bu sistemin kullanımı, WhatsApp'ın kullanım şartlarına uygun olmalıdır. Spam gönderimi veya izinsiz mesaj gönderimi yasaktır.
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 ```
 
 Bu README dosyası, projenin özelliklerini, kurulum ve kullanım talimatlarını, örnek kodları içermekte ve okuyucuların kolayca anlayabilmesi için yapılandırılmıştır. İstediğin gibi düzenlemeler yapabilirsin.

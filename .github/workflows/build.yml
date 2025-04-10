@@ -1,0 +1,150 @@
+name: Build Apps
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Versiyon tag'leri ile build tetiklenir, örn: v1.0.0 şeklinde
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+          pip install pynsist
+
+      - name: Create NSIS installer config
+        run: |
+          echo [Application] > pynsist.cfg
+          echo name=Otonom WhatsApp >> pynsist.cfg
+          echo entry_point=main2:main >> pynsist.cfg
+          echo icon=assets/otonom-whatsapp.ico >> pynsist.cfg
+          echo [Include] >> pynsist.cfg
+          echo pypi_wheels = >> pynsist.cfg
+          echo files = LICENSE >> pynsist.cfg
+          echo [Command] >> pynsist.cfg
+          echo otonom_whatsapp=main2:main >> pynsist.cfg
+
+      - name: Build Windows Installer
+        run: |
+          pynsist pynsist.cfg
+
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: Otonom-WhatsApp-Windows-Installer
+          path: build/nsis/Otonom WhatsApp.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fuse libfuse2
+          pip install -r requirements.txt
+          pip install pyinstaller
+          pip install appimage-builder
+
+      - name: Build Linux AppImage
+        run: |
+          pyinstaller --onefile --windowed --icon=assets/otonom-whatsapp.ico --name="OtonomWhatsApp" main2.py
+          mkdir -p AppDir/usr/{bin,share/{applications,icons/hicolor/256x256/apps}}
+          cp dist/OtonomWhatsApp AppDir/usr/bin/
+          cp assets/otonom-whatsapp.ico AppDir/usr/share/icons/hicolor/256x256/apps/otonom-whatsapp.png
+          echo "[Desktop Entry]
+Name=Otonom WhatsApp
+Exec=OtonomWhatsApp
+Icon=otonom-whatsapp
+Type=Application
+Categories=Utility;" > AppDir/usr/share/applications/otonom-whatsapp.desktop
+          appimage-builder --recipe AppImageBuilder.yml
+
+      - name: Upload Linux AppImage
+        uses: actions/upload-artifact@v3
+        with:
+          name: Otonom-WhatsApp-Linux-AppImage
+          path: OtonomWhatsApp-*.AppImage
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+          brew install create-dmg
+
+      - name: Build macOS App
+        run: |
+          pyinstaller --onefile --windowed --icon=assets/otonom-whatsapp.ico --name="OtonomWhatsApp" main2.py
+          mkdir -p "Otonom WhatsApp.app/Contents/MacOS"
+          mkdir -p "Otonom WhatsApp.app/Contents/Resources"
+          cp dist/OtonomWhatsApp "Otonom WhatsApp.app/Contents/MacOS/"
+          cp assets/otonom-whatsapp.ico "Otonom WhatsApp.app/Contents/Resources/"
+          echo '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>OtonomWhatsApp</string>
+    <key>CFBundleIconFile</key>
+    <string>otonom-whatsapp.ico</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.otonomwhatsapp.app</string>
+    <key>CFBundleName</key>
+    <string>Otonom WhatsApp</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.10</string>
+</dict>
+</plist>' > "Otonom WhatsApp.app/Contents/Info.plist"
+
+      - name: Create DMG
+        run: |
+          create-dmg \
+            --volname "Otonom WhatsApp" \
+            --volicon "assets/otonom-whatsapp.ico" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "Otonom WhatsApp.app" 200 190 \
+            --hide-extension "Otonom WhatsApp.app" \
+            --app-drop-link 600 185 \
+            "Otonom WhatsApp.dmg" \
+            "Otonom WhatsApp.app"
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v3
+        with:
+          name: Otonom-WhatsApp-macOS-DMG
+          path: Otonom\ WhatsApp.dmg

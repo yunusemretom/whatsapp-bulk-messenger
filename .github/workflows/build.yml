@@ -27,7 +27,7 @@ jobs:
           pyinstaller --noconfirm --onefile --windowed --icon=assets/resim.ico --name="OtonomWhatsApp" main2.py
 
       - name: EXE çıktısını yükle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OtonomWhatsApp-Windows
           path: dist/OtonomWhatsApp.exe
@@ -53,7 +53,7 @@ jobs:
           pyinstaller --noconfirm --onefile --windowed --name="OtonomWhatsApp" main2.py
 
       - name: Linux çıktısını yükle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OtonomWhatsApp-Linux
           path: dist/OtonomWhatsApp
@@ -79,7 +79,7 @@ jobs:
           pyinstaller --noconfirm --onefile --windowed --name="OtonomWhatsApp" main2.py
 
       - name: macOS çıktısını yükle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OtonomWhatsApp-macOS
           path: dist/OtonomWhatsApp

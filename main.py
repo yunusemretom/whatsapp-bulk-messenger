@@ -58,11 +58,12 @@ class WhatsAppSenderThread(QThread):
             # QR kod okutma için bekle
             
             try:
-                WebDriverWait(self.driver, self.delay).until(
+                WebDriverWait(self.driver, 100000).until(
                         EC.presence_of_element_located((By.XPATH, "//h1[text()='Sohbetler']"))
                     )
             except:
                 self.status_update.emit("Giriş yapılamadı. QR kodu okutulamadı.")
+                self.driver.quit()
                 self.finished_signal.emit()
                 return
             

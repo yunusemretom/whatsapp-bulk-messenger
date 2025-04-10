@@ -593,21 +593,65 @@ QListWidget{color: black;}</string>
               <string notr="true">font-weight: bold; color:#333333;</string>
              </property>
              <property name="text">
-              <string>Göndermek istediğiniz resim, video veya diğer dosyaları ekleyin</string>
+              <string>Göndermek istediğiniz resim, video veya diğer dosyaları ekleyin ve her biri için özel mesaj yazabilirsiniz</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QListWidget" name="mediaList">
-             <property name="styleSheet">
-              <string notr="true">QListWidget::item { padding: 6px; }
+            <layout class="QHBoxLayout" name="mediaContentLayout">
+             <item>
+              <widget class="QListWidget" name="mediaList">
+               <property name="styleSheet">
+                <string notr="true">QListWidget::item { padding: 6px; }
 QListWidget::item:alternate { background-color: #F7F7F7; }
 QListWidget{color:black;}</string>
-             </property>
-             <property name="alternatingRowColors">
-              <bool>true</bool>
-             </property>
-            </widget>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="mediaMessageLayout">
+               <item>
+                <widget class="QLabel" name="mediaMessageLabel">
+                 <property name="styleSheet">
+                  <string notr="true">font-weight: bold; color:#333333;</string>
+                 </property>
+                 <property name="text">
+                  <string>Seçili Medya İçin Özel Mesaj:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QTextEdit" name="mediaMessageEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>120</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: black;</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Seçili medya dosyası için özel mesaj yazın...</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mediaMessageStatusLabel">
+                 <property name="styleSheet">
+                  <string notr="true">color: #075E54; font-style: italic;</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
            </item>
            <item>
             <layout class="QHBoxLayout" name="mediaButtonsLayout">

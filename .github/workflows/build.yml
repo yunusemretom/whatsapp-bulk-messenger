@@ -69,11 +69,16 @@ jobs:
           pip install pyinstaller
           pip install appimage-builder
 
+      - name: Prepare AppDir
+        run: |
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+
       - name: Build Linux AppImage
         run: |
           pyinstaller --onefile --windowed --icon=assets/otonom-whatsapp.ico --name="OtonomWhatsApp" main2.py
-          mkdir -p AppDir/usr/{bin,share/{applications,icons/hicolor/256x256/apps}}
-          cp dist/OtonomWhatsApp AppDir/usr/bin/
+          cp dist/OtonomWhatsApp AppDir/usr/bin/OtonomWhatsApp
           cp assets/otonom-whatsapp.ico AppDir/usr/share/icons/hicolor/256x256/apps/otonom-whatsapp.png
           cat > AppDir/usr/share/applications/otonom-whatsapp.desktop << EOL
           [Desktop Entry]
@@ -83,6 +88,9 @@ jobs:
           Type=Application
           Categories=Utility;
           EOL
+
+      - name: Build AppImage
+        run: |
           appimage-builder --recipe AppImageBuilder.yml
 
       - name: Upload Linux AppImage
@@ -113,27 +121,27 @@ jobs:
           pyinstaller --onefile --windowed --icon=assets/otonom-whatsapp.ico --name="OtonomWhatsApp" main2.py
           mkdir -p "Otonom WhatsApp.app/Contents/MacOS"
           mkdir -p "Otonom WhatsApp.app/Contents/Resources"
-          cp dist/OtonomWhatsApp "Otonom WhatsApp.app/Contents/MacOS/"
-          cp assets/otonom-whatsapp.ico "Otonom WhatsApp.app/Contents/Resources/"
+          cp dist/OtonomWhatsApp "Otonom WhatsApp.app/Contents/MacOS/OtonomWhatsApp" # Dosya adını ekledim
+          cp assets/otonom-whatsapp.ico "Otonom WhatsApp.app/Contents/Resources/otonom-whatsapp.ico" # Dosya adını ekledim
           cat > "Otonom WhatsApp.app/Contents/Info.plist" << EOL
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-              <key>CFBundleExecutable</key>
-              <string>OtonomWhatsApp</string>
-              <key>CFBundleIconFile</key>
-              <string>otonom-whatsapp.ico</string>
-              <key>CFBundleIdentifier</key>
-              <string>com.otonomwhatsapp.app</string>
-              <key>CFBundleName</key>
-              <string>Otonom WhatsApp</string>
-              <key>CFBundlePackageType</key>
-              <string>APPL</string>
-              <key>CFBundleShortVersionString</key>
-              <string>1.0.0</string>
-              <key>LSMinimumSystemVersion</key>
-              <string>10.10</string>
+            <key>CFBundleExecutable</key>
+            <string>OtonomWhatsApp</string>
+            <key>CFBundleIconFile</key>
+            <string>otonom-whatsapp.ico</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.otonomwhatsapp.app</string>
+            <key>CFBundleName</key>
+            <string>Otonom WhatsApp</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleShortVersionString</key>
+            <string>1.0.0</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.10</string>
           </dict>
           </plist>
           EOL

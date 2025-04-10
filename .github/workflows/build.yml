@@ -25,15 +25,20 @@ jobs:
 
       - name: Create NSIS installer config
         run: |
-          echo [Application] > pynsist.cfg
-          echo name=Otonom WhatsApp >> pynsist.cfg
-          echo entry_point=main2:main >> pynsist.cfg
-          echo icon=assets/otonom-whatsapp.ico >> pynsist.cfg
-          echo [Include] >> pynsist.cfg
-          echo pypi_wheels = >> pynsist.cfg
-          echo files = LICENSE >> pynsist.cfg
-          echo [Command] >> pynsist.cfg
-          echo otonom_whatsapp=main2:main >> pynsist.cfg
+          cat > pynsist.cfg << EOL
+          [Application]
+          name=Otonom WhatsApp
+          version=1.0.0
+          entry_point=main2:main
+          icon=assets/otonom-whatsapp.ico
+          
+          [Include]
+          pypi_wheels = 
+          files = LICENSE
+          
+          [Command]
+          otonom_whatsapp=main2:main
+          EOL
 
       - name: Build Windows Installer
         run: |

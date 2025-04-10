@@ -40,7 +40,7 @@ jobs:
           pynsist pynsist.cfg
 
       - name: Upload Windows Installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Otonom-WhatsApp-Windows-Installer
           path: build/nsis/Otonom WhatsApp.exe
@@ -81,7 +81,7 @@ jobs:
           appimage-builder --recipe AppImageBuilder.yml
 
       - name: Upload Linux AppImage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Otonom-WhatsApp-Linux-AppImage
           path: OtonomWhatsApp-*.AppImage
@@ -148,7 +148,7 @@ jobs:
             "Otonom WhatsApp.app"
 
       - name: Upload macOS DMG
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Otonom-WhatsApp-macOS-DMG
           path: Otonom\ WhatsApp.dmg

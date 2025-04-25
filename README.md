@@ -2,9 +2,17 @@
 
 Bu uygulama, WhatsApp Web üzerinden toplu mesaj göndermenizi sağlayan bir araçtır. Medya dosyaları ve özel mesajlar ekleyerek kişiselleştirilmiş mesajlar gönderebilirsiniz.
 
-## Nasıl Kullanılır?
 
-![Ana Ekran](imgs/video.gif)
+![Ana Ekran](https://github.com/yunusemretom/whatsapp-bulk-messenger/blob/primary/imgs/video.gif)
+
+# Nasıl Kullanılır?
+
+- Uygulamanın cihazınıza uygun sürümünü release kısmından indirin.
+- Numaraları ülke kodları ile birlikte(90, 03, 68 vb.) metin dosyasına(txt) ekleyin. Her numaradan sonra bir satır atlayarak ekleyin.
+- Uygulamayı çalıştırın. Uygulamayı imzalayamadığımız için büyük ihtimalle size çalıştırma tarzında bir uyarı çıkabilir. Bu uyarı "yine de çalıştır" deyip atlayabilirsiniz.
+- Son olarak metinlerinizi girin ve arkanıza yaslanın. 
+- *Dikkat edin eğer aynı numaradan birden fazla varsa aynı numaraya aynı mesaj birden fazla gidebilir.*
+
 
 ## 📦 Sürüm Bilgisi
 
@@ -86,12 +94,6 @@ Bu uygulama, WhatsApp'ın resmi bir uygulaması değildir ve WhatsApp tarafında
 - Medya mesajları ve ayarlar yerel olarak saklanır
 - WhatsApp Web oturumu kapatıldığında tüm veriler silinir
 
-## Nasıl Kullanılır?
-
-![Ana Ekran](imgs/OtonomWhatsapp1.png)
-![Medya Ekleme](imgs/OtonomWhatsapp2.png)
-![Mesaj Gönderme](imgs/OtonomWhatsapp3.png)
-![Durum Ekranı](imgs/OtonomWhatsapp4.png)
 
 ## Gereksinimler
 

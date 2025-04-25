@@ -2,6 +2,10 @@
 
 Bu uygulama, WhatsApp Web üzerinden toplu mesaj göndermenizi sağlayan bir araçtır. Medya dosyaları ve özel mesajlar ekleyerek kişiselleştirilmiş mesajlar gönderebilirsiniz.
 
+## Nasıl Kullanılır?
+
+![Ana Ekran](imgs/video.gif)
+
 ## 📦 Sürüm Bilgisi
 
 **v1.1.0** (2024-03-08)
@@ -82,7 +86,7 @@ Bu uygulama, WhatsApp'ın resmi bir uygulaması değildir ve WhatsApp tarafında
 - Medya mesajları ve ayarlar yerel olarak saklanır
 - WhatsApp Web oturumu kapatıldığında tüm veriler silinir
 
-## Ekran Görüntüleri
+## Nasıl Kullanılır?
 
 ![Ana Ekran](imgs/OtonomWhatsapp1.png)
 ![Medya Ekleme](imgs/OtonomWhatsapp2.png)

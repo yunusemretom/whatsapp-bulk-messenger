@@ -21,12 +21,14 @@ jobs:
         run: |
           pip install pyinstaller
           pip install PySide6 selenium webdriver_manager
-
       - name: PyInstaller ile exe oluştur
         run: |
           pyinstaller --noconfirm --onefile --windowed --icon=assets/resim.ico --name="OtonomWhatsApp" main2.py
-
-      
+      - name: EXE çıktısını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: OtonomWhatsApp-Windows
+          path: dist/OtonomWhatsApp.exe
 
   build-linux:
     runs-on: ubuntu-latest
@@ -43,12 +45,14 @@ jobs:
         run: |
           pip install pyinstaller
           pip install PySide6 selenium webdriver_manager
-
       - name: PyInstaller ile linux binary oluştur
         run: |
           pyinstaller --noconfirm --onefile --windowed --name="OtonomWhatsApp" main2.py
-
-      
+      - name: Linux çıktısını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: OtonomWhatsApp-Linux
+          path: dist/OtonomWhatsApp
 
   build-macos:
     runs-on: macos-latest
@@ -65,7 +69,11 @@ jobs:
         run: |
           pip install pyinstaller
           pip install PySide6 selenium webdriver_manager
-
       - name: PyInstaller ile macOS binary oluştur
         run: |
           pyinstaller --noconfirm --onefile --windowed --name="OtonomWhatsApp" main2.py
+      - name: macOS çıktısını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: OtonomWhatsApp-macOS
+          path: dist/OtonomWhatsApp

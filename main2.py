@@ -121,7 +121,7 @@ class WhatsAppSenderThread(QThread):
                         for i, media_file in enumerate(self.media_files):
                             if i == 0:       
                                 attach_button = WebDriverWait(self.driver, self.delay).until(
-                                    EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='plus']"))
+                                    EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='plus-rounded']"))
                                 )
                                 attach_button.click()
                                 
@@ -131,12 +131,15 @@ class WhatsAppSenderThread(QThread):
                                 image_box = WebDriverWait(self.driver, 5).until(
                                     EC.presence_of_element_located((By.XPATH, "//input[@accept='image/*,video/mp4,video/3gpp,video/quicktime']"))
                                 )
+                                print("bu")
+
                             except:
                                 try:
                                     # İkinci deneme: Değişmiş seçici
                                     image_box = WebDriverWait(self.driver, 5).until(
                                         EC.presence_of_element_located((By.XPATH, "//input[@accept='*']"))
                                     )
+
                                 except:
                                     # Üçüncü deneme: Daha genel bir seçici
                                     image_box = WebDriverWait(self.driver, 5).until(
@@ -144,6 +147,7 @@ class WhatsAppSenderThread(QThread):
                                     )
                             
                             # Dosyayı yükle
+                            print(f"Yükleniyor: {media_file}")
                             image_box.send_keys(media_file)
                             time.sleep(self.wait)
                             
@@ -156,7 +160,7 @@ class WhatsAppSenderThread(QThread):
                         
                         # Medya dosyalarını gönder
                         send_button = WebDriverWait(self.driver, self.delay).until(
-                            EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='send']"))
+                            EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='wds-ic-send-filled']"))
                         )
                         send_button.click()
                         time.sleep(self.wait)
@@ -181,7 +185,7 @@ class WhatsAppSenderThread(QThread):
                         
                         # Mesajı gönder
                         send_button = WebDriverWait(self.driver, self.delay).until(
-                            EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='send']"))
+                            EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='wds-ic-send-filled']"))
                         )
                         send_button.click()
                         time.sleep(self.wait)

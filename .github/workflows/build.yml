@@ -26,21 +26,7 @@ jobs:
         run: |
           pyinstaller --noconfirm --onefile --windowed --icon=assets/resim.ico --name="OtonomWhatsApp" main2.py
 
-      - name: Release oluştur
-        id: create_release
-        run: |
-          RELEASE_RESPONSE=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -d '{"tag_name": "${{ github.ref }}", "name": "Release ${{ github.ref }}", "body": "Release notes"}' \
-          https://api.github.com/repos/${{ github.repository }}/releases)
-          echo "::set-output name=upload_url::$(echo $RELEASE_RESPONSE | jq -r .upload_url)"
-
-      - name: Windows EXE çıktısını yükle
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/OtonomWhatsApp.exe
-          asset_name: OtonomWhatsApp-Windows.exe
-          asset_content_type: application/octet-stream
+      
 
   build-linux:
     runs-on: ubuntu-latest
@@ -62,21 +48,7 @@ jobs:
         run: |
           pyinstaller --noconfirm --onefile --windowed --name="OtonomWhatsApp" main2.py
 
-      - name: Release oluştur
-        id: create_release_linux
-        run: |
-          RELEASE_RESPONSE=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -d '{"tag_name": "${{ github.ref }}", "name": "Release ${{ github.ref }}", "body": "Release notes"}' \
-          https://api.github.com/repos/${{ github.repository }}/releases)
-          echo "::set-output name=upload_url::$(echo $RELEASE_RESPONSE | jq -r .upload_url)"
-
-      - name: Linux Binary çıktısını yükle
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release_linux.outputs.upload_url }}
-          asset_path: dist/OtonomWhatsApp
-          asset_name: OtonomWhatsApp-Linux
-          asset_content_type: application/octet-stream
+      
 
   build-macos:
     runs-on: macos-latest
@@ -97,19 +69,3 @@ jobs:
       - name: PyInstaller ile macOS binary oluştur
         run: |
           pyinstaller --noconfirm --onefile --windowed --name="OtonomWhatsApp" main2.py
-
-      - name: Release oluştur
-        id: create_release_macos
-        run: |
-          RELEASE_RESPONSE=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -d '{"tag_name": "${{ github.ref }}", "name": "Release ${{ github.ref }}", "body": "Release notes"}' \
-          https://api.github.com/repos/${{ github.repository }}/releases)
-          echo "::set-output name=upload_url::$(echo $RELEASE_RESPONSE | jq -r .upload_url)"
-
-      - name: macOS Binary çıktısını yükle
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release_macos.outputs.upload_url }}
-          asset_path: dist/OtonomWhatsApp
-          asset_name: OtonomWhatsApp-macOS
-          asset_content_type: application/octet-stream

@@ -64,6 +64,7 @@ class WhatsAppSenderThread(QThread):
                 WebDriverWait(self.driver, 60000000).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '[role="grid"]'))
                 )
+                sleep(2)
             except:
                 self.status_update.emit("Giriş yapılamadı. QR kodu okutulamadı.")
                 self.driver.quit()
@@ -91,7 +92,7 @@ class WhatsAppSenderThread(QThread):
                     # Geçersiz numara kontrolü - daha hızlı ve etkili
                     try:
                         # Önce sayfanın yüklenmesini bekle
-                        WebDriverWait(self.driver, 10).until(
+                        WebDriverWait(self.driver, 30).until(
                             EC.presence_of_element_located((By.XPATH, "//div[@id='main']"))
                         )
                         
@@ -228,7 +229,7 @@ class WhatsAppSenderThread(QThread):
                                     time.sleep(self.wait)
                                     self.log_status("Gönder butonu bulunamadı, Enter ile gönderildi.")
                                 except Exception as e:
-                                    self.log_status(f"Gönder butonu ve Enter ile gönderme başarısız: {str(e)}")
+                                    self.log_status(f"Gönder butonu ve Enter ile gönderme başarısız")
                     
                     if self.is_running:
                         self.log_status(f"Mesaj gönderildi: {number}")

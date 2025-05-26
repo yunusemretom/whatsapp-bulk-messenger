@@ -42,9 +42,13 @@ class WhatsAppSenderThread(QThread):
         log_entry = f"[{current_time}] {message}"
         self.status_update.emit(log_entry)  
 
-    def remove_non_bmp(self, text):
-        # Sadece BMP karakterlerini döndür
-        return ''.join(c for c in text if ord(c) <= 0xFFFF)
+    def send_multiline_message(self, message_box, message):
+        from selenium.webdriver.common.keys import Keys
+        lines = message.splitlines()
+        for idx, line in enumerate(lines):
+            message_box.send_keys(line)
+            if idx != len(lines) - 1:
+                message_box.send_keys(Keys.SHIFT + Keys.ENTER)
 
     def run(self):
         try:
@@ -62,16 +66,7 @@ class WhatsAppSenderThread(QThread):
             self.driver.get('https://web.whatsapp.com')
             
             # Sayfa ilk açıldığında çıkan butona tıkla (varsa)
-            try:
-                # Örnek XPATH, gerekirse değiştirin
-                first_button = WebDriverWait(self.driver, 5).until(
-                    EC.element_to_be_clickable((By.XPATH, "//button"))
-                )
-                first_button.click()
-                self.log_status("Açılışta çıkan butona tıklandı.")
-            except:
-                pass  # Buton yoksa devam et
-            
+           
             self.status_update.emit("WhatsApp Web'e giriş yapın ve QR kodu okutun...")
             # QR kod okutma için bekle
             
@@ -85,6 +80,16 @@ class WhatsAppSenderThread(QThread):
                 self.driver.quit()
                 self.finished_signal.emit()
                 return
+            
+            try:
+                # Örnek XPATH, gerekirse değiştirin
+                first_button = WebDriverWait(self.driver, 5).until(
+                    EC.element_to_be_clickable((By.XPATH, "//button"))
+                )
+                first_button.click()
+                self.log_status("Açılışta çıkan butona tıklandı.")
+            except:
+                pass  # Buton yoksa devam et
             
             total_number = len(self.numbers)
             for idx, number in enumerate(self.numbers):
@@ -173,8 +178,7 @@ class WhatsAppSenderThread(QThread):
                                 message_box = WebDriverWait(self.driver, self.delay).until(
                                     EC.presence_of_element_located((By.XPATH, "//div[@role='textbox']"))
                                 )
-                                safe_media_message = self.remove_non_bmp(self.media_messages[media_file])
-                                message_box.send_keys(safe_media_message)
+                                message_box.send_keys(self.media_messages[media_file])
                         
                         # Medya dosyalarını gönder
                         send_button = WebDriverWait(self.driver, self.delay).until(
@@ -215,10 +219,9 @@ class WhatsAppSenderThread(QThread):
                         else:
                             message_box.click()
                             message_box.clear()
-                            safe_message = self.remove_non_bmp(self.message)
-                            message_box.send_keys(safe_message)
+                            safe_message = self.remove_non_bmp(self.message) if hasattr(self, 'remove_non_bmp') else self.message
+                            self.send_multiline_message(message_box, safe_message)
                             time.sleep(self.wait)
-
                             # Gönder butonunu bulmak için birden fazla seçiciyle dene
                             send_button = None
                             send_button_selectors = [

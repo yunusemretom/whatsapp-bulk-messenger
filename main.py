@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import json
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QLabel, QTextEdit, QFileDialog, QListWidget, 
                              QSpinBox, QProgressBar, QTabWidget, QMessageBox, QLineEdit,
@@ -18,18 +19,19 @@ from selenium.webdriver.common.by import By
 from time import sleep
 import time
 from PySide6.QtWidgets import QInputDialog
-from GUI import Ui_MainWindow  # Dönüştürülen UI dosyası
+from GUI_RELEASE import Ui_MainWindow  # Dönüştürülen UI dosyası
 
 class WhatsAppSenderThread(QThread):
     progress_update = Signal(int, str)  # İlerleme durumu için sinyal
     status_update = Signal(str)         # Durum mesajları için sinyal
     finished_signal = Signal()          # İşlem bitişi için sinyal
 
-    def __init__(self, numbers, message, media_files, wait, delay):
+    def __init__(self, numbers, message, media_files, media_messages, wait, delay):
         super().__init__()
         self.numbers = numbers
         self.message = message
         self.media_files = media_files
+        self.media_messages = media_messages  # Medya mesajlarını ekle
         self.delay = delay * 10
         self.wait = wait 
         self.is_running = True
@@ -58,9 +60,9 @@ class WhatsAppSenderThread(QThread):
             # QR kod okutma için bekle
             
             try:
-                WebDriverWait(self.driver, 100000).until(
-                        EC.presence_of_element_located((By.XPATH, "//h1[text()='Sohbetler']"))
-                    )
+                WebDriverWait(self.driver, 60000000).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, '[role="grid"]'))
+                )
             except:
                 self.status_update.emit("Giriş yapılamadı. QR kodu okutulamadı.")
                 self.driver.quit()
@@ -81,44 +83,113 @@ class WhatsAppSenderThread(QThread):
                 self.status_update.emit(f"Mesaj gönderiliyor: {number}")
                 
                 try:
-                    url = f'https://web.whatsapp.com/send?phone={number}&text={quote(self.message)}'
+                    # Önce URL'yi medya olmadan aç (sadece sohbeti başlat)
+                    url = f'https://web.whatsapp.com/send?phone={number}'
                     self.driver.get(url)
                     
+                    # Geçersiz numara kontrolü - daha hızlı ve etkili
                     try:
-                        WebDriverWait(self.driver, self.delay).until(
-                        EC.presence_of_element_located((By.XPATH, "//div[text()='URL yoluyla paylaşılan telefon numarası geçersiz.']"))
+                        # Önce sayfanın yüklenmesini bekle
+                        WebDriverWait(self.driver, 10).until(
+                            EC.presence_of_element_located((By.XPATH, "//div[@id='main']"))
                         )
-                        self.log_status(f"Geçersiz numara: {number}")
-                        continue
-                    except:
-                        pass
+                        
+                        # Geçersiz numara mesajlarını kontrol et
+                        invalid_messages = [
+                            "//div[text()='URL yoluyla paylaşılan telefon numarası geçersiz.']",
+                            "//div[contains(text(), 'Telefon numarası geçersiz')]",
+                            "//div[contains(text(), 'The phone number shared via url is invalid')]"
+                        ]
+                        
+                        for xpath in invalid_messages:
+                            try:
+                                if self.driver.find_elements(By.XPATH, xpath):
+                                    self.log_status(f"Geçersiz numara: {number}")
+                                    break
+                            except:
+                                pass
+                        else:
+                            # Hiçbir geçersiz mesaj bulunamadıysa, mesaj gönderme işlemine devam et
+                            pass
+                    except Exception as e:
+                        self.log_status(f"Numara kontrolü sırasında hata: {str(e)}")
+                        # Hata olsa bile devam et, belki numara geçerlidir
 
                     # Medya dosyalarını gönder
                     if self.media_files:
                         self.status_update.emit("Medya dosyaları yükleniyor...")
                         for i, media_file in enumerate(self.media_files):
-                            attach_button = WebDriverWait(self.driver, self.delay).until(
-                                EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='plus']"))
-                            )
-                            attach_button.click()
+                            if i == 0:       
+                                attach_button = WebDriverWait(self.driver, self.delay).until(
+                                    EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='plus-rounded']"))
+                                )
+                                attach_button.click()
+                                
+                            # Daha esnek bir yaklaşım kullanarak input elementini bul
+                            try:
+                                # İlk deneme: Orijinal seçici
+                                image_box = WebDriverWait(self.driver, 5).until(
+                                    EC.presence_of_element_located((By.XPATH, "//input[@accept='image/*,video/mp4,video/3gpp,video/quicktime']"))
+                                )
+                                print("bu")
+
+                            except:
+                                try:
+                                    # İkinci deneme: Değişmiş seçici
+                                    image_box = WebDriverWait(self.driver, 5).until(
+                                        EC.presence_of_element_located((By.XPATH, "//input[@accept='*']"))
+                                    )
+
+                                except:
+                                    # Üçüncü deneme: Daha genel bir seçici
+                                    image_box = WebDriverWait(self.driver, 5).until(
+                                        EC.presence_of_element_located((By.XPATH, "//input[@type='file']"))
+                                    )
                             
-                            image_box = WebDriverWait(self.driver, self.delay).until(
-                                EC.presence_of_element_located((By.XPATH, "//input[@accept='image/*,video/mp4,video/3gpp,video/quicktime']"))
-                            )
+                            # Dosyayı yükle
+                            print(f"Yükleniyor: {media_file}")
                             image_box.send_keys(media_file)
                             time.sleep(self.wait)
+                            
+                            # Medya mesajını gönder
+                            if media_file in self.media_messages and self.media_messages[media_file]:
+                                message_box = WebDriverWait(self.driver, self.delay).until(
+                                    EC.presence_of_element_located((By.XPATH, "//div[@role='textbox']"))
+                                )
+                                message_box.send_keys(self.media_messages[media_file])
+                        
+                        # Medya dosyalarını gönder
+                        send_button = WebDriverWait(self.driver, self.delay).until(
+                            EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='wds-ic-send-filled']"))
+                        )
+                        send_button.click()
+                        time.sleep(self.wait)
+                        
+                        # Yükleme tamamlanana kadar bekle
+                        try:
+                            target_div = self.driver.find_element(By.CSS_SELECTOR, "div[data-tab='8'].x3psx0u")
+                            WebDriverWait(target_div, 300).until_not(
+                                EC.presence_of_element_located((By.TAG_NAME, "circle"))
+                            )
+                        except:
+                            self.log_status("Medya yükleme durumu kontrol edilemedi, devam ediliyor...")
                     
-                    # Mesajı gönder
-                    send_button = WebDriverWait(self.driver, self.delay).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='send']"))
-                    )
-                    send_button.click()
-                    time.sleep(self.wait)
-                    # Yükleme tamamlanana kadar bekle
-                    target_div = self.driver.find_element(By.CSS_SELECTOR, "div[data-tab='8'].x3psx0u")
-                    WebDriverWait(target_div, 300).until_not(
-                        EC.presence_of_element_located((By.TAG_NAME, "circle"))
-                    )
+                    # Ana mesajı gönder (eğer varsa)
+                    if self.message:
+                        # Mesaj kutusunu bul ve mesajı yaz
+                        message_box = WebDriverWait(self.driver, self.delay).until(
+                            EC.presence_of_element_located((By.XPATH, "//div[@role='textbox' and @data-tab='10']"))
+                        )
+                        message_box.send_keys(self.message)
+                        time.sleep(self.wait)
+                        
+                        # Mesajı gönder
+                        send_button = WebDriverWait(self.driver, self.delay).until(
+                            EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='wds-ic-send-filled']"))
+                        )
+                        send_button.click()
+                        time.sleep(self.wait)
+                    
                     if self.is_running:
                         self.log_status(f"Mesaj gönderildi: {number}")
                 
@@ -130,16 +201,14 @@ class WhatsAppSenderThread(QThread):
             self.driver.quit()
             self.finished_signal.emit()
             
-        
         except Exception as e:
             self.status_update.emit(f"Kritik hata: {str(e)}")
             self.finished_signal.emit()
     
-    def stop(self):  # Yeni stop metodu ekle
+    def stop(self):
         self.is_running = False
-        if self.driver:
+        if hasattr(self, 'driver'):
             self.driver.quit()
-        
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -149,9 +218,21 @@ class MainApp(QMainWindow):
         
         self.sender_thread = None
         self.media_files = []
+        self.media_messages = {}  # Medya dosyaları ve mesajlarını saklamak için
         self.numbers = []
+        
+        # Ayarları yükle
+        self.load_settings()
+        
+        # UI bağlantıları
+        self.setup_connections()
+        
+        # Medya listesi değişikliklerini izle
+        self.ui.mediaList.itemSelectionChanged.connect(self.on_media_selection_changed)
+        self.ui.mediaMessageEdit.textChanged.connect(self.on_media_message_changed)
+
+    def setup_connections(self):
         self.ui.addNumberBtn.clicked.connect(self.add_number)
-        # Butonları bağla
         self.ui.startBtn.clicked.connect(self.start_sending)
         self.ui.stopBtn.clicked.connect(self.stop_sending)
         self.ui.removeNumberBtn.clicked.connect(self.remove_number)
@@ -159,7 +240,108 @@ class MainApp(QMainWindow):
         self.ui.addMediaBtn.clicked.connect(self.add_media)
         self.ui.removeMediaBtn.clicked.connect(self.remove_media)
         self.ui.clearMediaBtn.clicked.connect(self.clear_media)
+        
+        # Delay ve wait değerleri değiştiğinde ayarları kaydet
+        self.ui.delaySpin.valueChanged.connect(self.save_settings)
+        self.ui.waitSpin.valueChanged.connect(self.save_settings)
 
+    def load_settings(self):
+        try:
+            if os.path.exists('settings.json'):
+                with open('settings.json', 'r', encoding='utf-8') as f:
+                    settings = json.load(f)
+                    self.media_messages = settings.get('media_messages', {})
+                    
+                    # Delay ve wait değerlerini yükle
+                    delay = settings.get('delay', 3)
+                    wait = settings.get('wait', 3)
+                    self.ui.delaySpin.setValue(delay)
+                    self.ui.waitSpin.setValue(wait)
+                    
+                    # Medya listesini güncelle
+                    self.update_media_list()
+        except Exception as e:
+            self.log_status(f"Ayarlar yüklenirken hata: {str(e)}")
+
+    def save_settings(self):
+        try:
+            settings = {
+                'media_messages': self.media_messages,
+                'delay': self.ui.delaySpin.value(),
+                'wait': self.ui.waitSpin.value()
+            }
+            with open('settings.json', 'w', encoding='utf-8') as f:
+                json.dump(settings, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            self.log_status(f"Ayarlar kaydedilirken hata: {str(e)}")
+
+    def update_media_list(self):
+        self.ui.mediaList.clear()
+        for file_path in self.media_files:
+            item = QListWidgetItem(os.path.basename(file_path))
+            if file_path in self.media_messages:
+                item.setText(f"★ {os.path.basename(file_path)}")
+            self.ui.mediaList.addItem(item)
+
+    def on_media_selection_changed(self):
+        selected_items = self.ui.mediaList.selectedItems()
+        if selected_items:
+            file_name = selected_items[0].text().replace('★ ', '')
+            file_path = next((path for path in self.media_files if os.path.basename(path) == file_name), None)
+            if file_path:
+                self.ui.mediaMessageEdit.setText(self.media_messages.get(file_path, ''))
+        else:
+            self.ui.mediaMessageEdit.clear()
+
+    def on_media_message_changed(self):
+        selected_items = self.ui.mediaList.selectedItems()
+        if selected_items:
+            file_name = selected_items[0].text().replace('★ ', '')
+            file_path = next((path for path in self.media_files if os.path.basename(path) == file_name), None)
+            if file_path:
+                message = self.ui.mediaMessageEdit.toPlainText()
+                if message:
+                    self.media_messages[file_path] = message
+                    selected_items[0].setText(f"★ {file_name}")
+                else:
+                    self.media_messages.pop(file_path, None)
+                    selected_items[0].setText(file_name)
+                self.save_settings()
+
+    def add_media(self):
+        file_paths, _ = QFileDialog.getOpenFileNames(self, "Medya Dosyaları Ekle", "", 
+                                                  "Medya Dosyaları (*.jpg *.jpeg *.png *.pdf *.mp4)")
+        if not file_paths:
+            return
+            
+        for path in file_paths:
+            self.media_files.append(path)
+            item = QListWidgetItem(os.path.basename(path))
+            if path in self.media_messages:
+                item.setText(f"★ {os.path.basename(path)}")
+            self.ui.mediaList.addItem(item)
+        self.save_settings()
+
+    def remove_media(self):
+        selected_items = self.ui.mediaList.selectedItems()
+        if not selected_items:
+            return
+            
+        for item in selected_items:
+            file_name = item.text().replace('★ ', '')
+            file_path = next((path for path in self.media_files if os.path.basename(path) == file_name), None)
+            if file_path:
+                self.media_files.remove(file_path)
+                self.media_messages.pop(file_path, None)
+                self.ui.mediaList.takeItem(self.ui.mediaList.row(item))
+        self.save_settings()
+
+    def clear_media(self):
+        self.media_files.clear()
+        self.media_messages.clear()
+        self.ui.mediaList.clear()
+        self.ui.mediaMessageEdit.clear()
+        self.save_settings()
 
     def start_sending(self):
         if self.sender_thread and self.sender_thread.isRunning():
@@ -174,7 +356,7 @@ class MainApp(QMainWindow):
             QMessageBox.critical(self, "Hata", "Lütfen en az bir numara ekleyin!")
             return
         
-        self.sender_thread = WhatsAppSenderThread(self.numbers, message, self.media_files, wait, delay)
+        self.sender_thread = WhatsAppSenderThread(self.numbers, message, self.media_files, self.media_messages, wait, delay)
         self.sender_thread.progress_update.connect(self.update_progress)
         self.sender_thread.status_update.connect(self.update_status)
         self.sender_thread.finished_signal.connect(self.sending_finished)
@@ -239,38 +421,6 @@ class MainApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Hata", f"Dosya içe aktarılırken hata oluştu: {str(e)}")
     
-    def add_media(self):
-        file_paths, _ = QFileDialog.getOpenFileNames(self, "Medya Dosyaları Ekle", "", 
-                                                  "Medya Dosyaları (*.jpg *.jpeg *.png *.pdf *.mp4)")
-        if not file_paths:
-            return
-            
-        for path in file_paths:
-            self.media_files.append(path)
-            self.ui.mediaList.addItem(os.path.basename(path))
-            
-        self.log_status(f"{len(file_paths)} medya dosyası eklendi.")
-    
-    def remove_media(self):
-        selected_items = self.ui.mediaList.selectedItems()
-        if not selected_items:
-            return
-            
-        for item in selected_items:
-            file_name = item.text()
-            for i, path in enumerate(self.media_files):
-                if os.path.basename(path) == file_name:
-                    self.media_files.pop(i)
-                    break
-                    
-            self.ui.mediaList.takeItem(self.ui.mediaList.row(item))
-            self.log_status(f"Medya dosyası kaldırıldı: {file_name}")
-    
-    def clear_media(self):
-        self.media_files.clear()
-        self.ui.mediaList.clear()
-        self.log_status("Tüm medya dosyaları temizlendi.")
-
     def log_status(self, message):
         current_time = time.strftime("%H:%M:%S")
         log_entry = f"[{current_time}] {message}"

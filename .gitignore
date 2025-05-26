@@ -29,5 +29,7 @@ Thumbs.db
 
 # Project specific
 settings.json 
-
+number.txt
+messages.txt
+# Compiled files
 *.zip

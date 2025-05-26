@@ -42,6 +42,10 @@ class WhatsAppSenderThread(QThread):
         log_entry = f"[{current_time}] {message}"
         self.status_update.emit(log_entry)  
 
+    def remove_non_bmp(self, text):
+        # Sadece BMP karakterlerini döndür
+        return ''.join(c for c in text if ord(c) <= 0xFFFF)
+
     def run(self):
         try:
             options = Options()
@@ -56,6 +60,17 @@ class WhatsAppSenderThread(QThread):
 
             self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
             self.driver.get('https://web.whatsapp.com')
+            
+            # Sayfa ilk açıldığında çıkan butona tıkla (varsa)
+            try:
+                # Örnek XPATH, gerekirse değiştirin
+                first_button = WebDriverWait(self.driver, 5).until(
+                    EC.element_to_be_clickable((By.XPATH, "//button"))
+                )
+                first_button.click()
+                self.log_status("Açılışta çıkan butona tıklandı.")
+            except:
+                pass  # Buton yoksa devam et
             
             self.status_update.emit("WhatsApp Web'e giriş yapın ve QR kodu okutun...")
             # QR kod okutma için bekle
@@ -158,7 +173,8 @@ class WhatsAppSenderThread(QThread):
                                 message_box = WebDriverWait(self.driver, self.delay).until(
                                     EC.presence_of_element_located((By.XPATH, "//div[@role='textbox']"))
                                 )
-                                message_box.send_keys(self.media_messages[media_file])
+                                safe_media_message = self.remove_non_bmp(self.media_messages[media_file])
+                                message_box.send_keys(safe_media_message)
                         
                         # Medya dosyalarını gönder
                         send_button = WebDriverWait(self.driver, self.delay).until(
@@ -199,7 +215,8 @@ class WhatsAppSenderThread(QThread):
                         else:
                             message_box.click()
                             message_box.clear()
-                            message_box.send_keys(self.message)
+                            safe_message = self.remove_non_bmp(self.message)
+                            message_box.send_keys(safe_message)
                             time.sleep(self.wait)
 
                             # Gönder butonunu bulmak için birden fazla seçiciyle dene

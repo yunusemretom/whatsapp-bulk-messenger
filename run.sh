@@ -1,11 +1,16 @@
 #!/bin/bash
 # macOS/Linux için otomatik başlatıcı
 
+
+
 # Python yüklü mü kontrol et
 if ! command -v python3 &> /dev/null; then
     echo "Python3 yüklü değil. Lütfen Python3 kurun."
     exit 1
 fi
+
+# Güncellemeleri kontrol et
+python3 update.py
 
 # Gerekli paketler yüklü mü kontrol et
 python3 -m pip show PySide6 > /dev/null 2>&1

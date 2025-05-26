@@ -21,38 +21,6 @@ from time import sleep
 import time
 from PySide6.QtWidgets import QInputDialog
 from GUI_RELEASE import Ui_MainWindow  # Dönüştürülen UI dosyası
-import requests
-import zipfile
-import io
-
-APP_VERSION = "1.0.0"  # Buraya mevcut uygulama sürümünü yaz
-GITHUB_VERSION_URL = "https://raw.githubusercontent.com/<kullanici>/<repo>/main/latest_version.txt"  # Burayı kendi repo adresinle değiştir
-GITHUB_RELEASE_ZIP = "https://github.com/<kullanici>/<repo>/releases/latest/download/OtonomWhatsApp-Windows.zip"  # Burayı kendi repo adresinle değiştir
-
-class UpdateManager:
-    @staticmethod
-    def check_for_update():
-        try:
-            response = requests.get(GITHUB_VERSION_URL, timeout=5)
-            if response.status_code == 200:
-                latest_version = response.text.strip()
-                if latest_version != APP_VERSION:
-                    return latest_version
-        except Exception as e:
-            print(f"Güncelleme kontrolü başarısız: {e}")
-        return None
-
-    @staticmethod
-    def download_and_install_update():
-        try:
-            response = requests.get(GITHUB_RELEASE_ZIP, stream=True)
-            if response.status_code == 200:
-                with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-                    z.extractall(os.getcwd())
-                return True
-        except Exception as e:
-            print(f"Güncelleme indirilemedi: {e}")
-        return False
 
 class WhatsAppSenderThread(QThread):
     progress_update = Signal(int, str)  # İlerleme durumu için sinyal
@@ -303,8 +271,6 @@ class MainApp(QMainWindow):
         self.ui.mediaList.itemSelectionChanged.connect(self.on_media_selection_changed)
         self.ui.mediaMessageEdit.textChanged.connect(self.on_media_message_changed)
 
-        self.check_update_on_startup()
-
     def setup_connections(self):
         self.ui.addNumberBtn.clicked.connect(self.add_number)
         self.ui.startBtn.clicked.connect(self.start_sending)
@@ -501,19 +467,6 @@ class MainApp(QMainWindow):
         self.ui.statusText.append(log_entry)
         # Otomatik olarak en alta kaydır
         self.ui.statusText.verticalScrollBar().setValue(self.ui.statusText.verticalScrollBar().maximum())
-
-    def check_update_on_startup(self):
-        latest_version = UpdateManager.check_for_update()
-        if latest_version:
-            reply = QMessageBox.question(self, "Güncelleme Var", f"Yeni sürüm bulundu: {latest_version}. Güncellemek ister misiniz?", QMessageBox.Yes | QMessageBox.No)
-            if reply == QMessageBox.Yes:
-                self.ui.statusText.append("Güncelleme indiriliyor...")
-                success = UpdateManager.download_and_install_update()
-                if success:
-                    QMessageBox.information(self, "Güncelleme", "Güncelleme tamamlandı. Uygulama yeniden başlatılacak.")
-                    os.execl(sys.executable, sys.executable, *sys.argv)
-                else:
-                    QMessageBox.critical(self, "Güncelleme", "Güncelleme indirilemedi!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

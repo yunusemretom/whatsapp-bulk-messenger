@@ -1,6 +1,8 @@
 @echo off
 REM Windows için otomatik başlatıcı
 
+
+
 REM Python yüklü mü kontrol et
 where python >nul 2>nul
 if %errorlevel% neq 0 (
@@ -8,6 +10,9 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+
+REM Güncellemeleri kontrol et
+python update.py
 
 REM Gerekli paketler yüklü mü kontrol et
 python -m pip show PySide6 >nul 2>nul
@@ -18,3 +23,4 @@ if %errorlevel% neq 0 (
 
 REM Uygulamayı başlat
 python main.py
+pause

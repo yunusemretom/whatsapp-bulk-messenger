@@ -16,10 +16,43 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from time import sleep
 import time
 from PySide6.QtWidgets import QInputDialog
 from GUI_RELEASE import Ui_MainWindow  # Dönüştürülen UI dosyası
+import requests
+import zipfile
+import io
+
+APP_VERSION = "1.0.0"  # Buraya mevcut uygulama sürümünü yaz
+GITHUB_VERSION_URL = "https://raw.githubusercontent.com/<kullanici>/<repo>/main/latest_version.txt"  # Burayı kendi repo adresinle değiştir
+GITHUB_RELEASE_ZIP = "https://github.com/<kullanici>/<repo>/releases/latest/download/OtonomWhatsApp-Windows.zip"  # Burayı kendi repo adresinle değiştir
+
+class UpdateManager:
+    @staticmethod
+    def check_for_update():
+        try:
+            response = requests.get(GITHUB_VERSION_URL, timeout=5)
+            if response.status_code == 200:
+                latest_version = response.text.strip()
+                if latest_version != APP_VERSION:
+                    return latest_version
+        except Exception as e:
+            print(f"Güncelleme kontrolü başarısız: {e}")
+        return None
+
+    @staticmethod
+    def download_and_install_update():
+        try:
+            response = requests.get(GITHUB_RELEASE_ZIP, stream=True)
+            if response.status_code == 200:
+                with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                    z.extractall(os.getcwd())
+                return True
+        except Exception as e:
+            print(f"Güncelleme indirilemedi: {e}")
+        return False
 
 class WhatsAppSenderThread(QThread):
     progress_update = Signal(int, str)  # İlerleme durumu için sinyal
@@ -176,19 +209,58 @@ class WhatsAppSenderThread(QThread):
                     
                     # Ana mesajı gönder (eğer varsa)
                     if self.message:
-                        # Mesaj kutusunu bul ve mesajı yaz
-                        message_box = WebDriverWait(self.driver, self.delay).until(
-                            EC.presence_of_element_located((By.XPATH, "//div[@role='textbox' and @data-tab='10']"))
-                        )
-                        message_box.send_keys(self.message)
-                        time.sleep(self.wait)
-                        
-                        # Mesajı gönder
-                        send_button = WebDriverWait(self.driver, self.delay).until(
-                            EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='wds-ic-send-filled']"))
-                        )
-                        send_button.click()
-                        time.sleep(self.wait)
+                        # Mesaj kutusunu bulmak için birden fazla seçiciyle dene
+                        message_box = None
+                        message_box_selectors = [
+                            "//div[@role='textbox' and @data-tab='10']",
+                            "//div[@role='textbox']",
+                            "//p[@class='selectable-text copyable-text']"
+                        ]
+                        for selector in message_box_selectors:
+                            try:
+                                message_box = WebDriverWait(self.driver, self.delay).until(
+                                    EC.presence_of_element_located((By.XPATH, selector))
+                                )
+                                if message_box:
+                                    break
+                            except:
+                                continue
+                        if not message_box:
+                            self.log_status("Mesaj kutusu bulunamadı, atlanıyor.")
+                        else:
+                            message_box.click()
+                            message_box.clear()
+                            message_box.send_keys(self.message)
+                            time.sleep(self.wait)
+
+                            # Gönder butonunu bulmak için birden fazla seçiciyle dene
+                            send_button = None
+                            send_button_selectors = [
+                                "//span[@data-icon='wds-ic-send-filled']",
+                                "//button[@data-testid='compose-btn-send']",
+                                "//span[@data-icon='send']"
+                            ]
+                            for selector in send_button_selectors:
+                                try:
+                                    send_button = WebDriverWait(self.driver, self.delay).until(
+                                        EC.element_to_be_clickable((By.XPATH, selector))
+                                    )
+                                    if send_button:
+                                        break
+                                except:
+                                    continue
+                            if send_button:
+                                send_button.click()
+                                time.sleep(self.wait)
+                            else:
+                                # Son çare: Enter tuşuna basarak gönder
+                                try:
+                                    message_box.click()
+                                    message_box.send_keys(Keys.ENTER)
+                                    time.sleep(self.wait)
+                                    self.log_status("Gönder butonu bulunamadı, Enter ile gönderildi.")
+                                except Exception as e:
+                                    self.log_status(f"Gönder butonu ve Enter ile gönderme başarısız: {str(e)}")
                     
                     if self.is_running:
                         self.log_status(f"Mesaj gönderildi: {number}")
@@ -230,6 +302,8 @@ class MainApp(QMainWindow):
         # Medya listesi değişikliklerini izle
         self.ui.mediaList.itemSelectionChanged.connect(self.on_media_selection_changed)
         self.ui.mediaMessageEdit.textChanged.connect(self.on_media_message_changed)
+
+        self.check_update_on_startup()
 
     def setup_connections(self):
         self.ui.addNumberBtn.clicked.connect(self.add_number)
@@ -427,6 +501,19 @@ class MainApp(QMainWindow):
         self.ui.statusText.append(log_entry)
         # Otomatik olarak en alta kaydır
         self.ui.statusText.verticalScrollBar().setValue(self.ui.statusText.verticalScrollBar().maximum())
+
+    def check_update_on_startup(self):
+        latest_version = UpdateManager.check_for_update()
+        if latest_version:
+            reply = QMessageBox.question(self, "Güncelleme Var", f"Yeni sürüm bulundu: {latest_version}. Güncellemek ister misiniz?", QMessageBox.Yes | QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                self.ui.statusText.append("Güncelleme indiriliyor...")
+                success = UpdateManager.download_and_install_update()
+                if success:
+                    QMessageBox.information(self, "Güncelleme", "Güncelleme tamamlandı. Uygulama yeniden başlatılacak.")
+                    os.execl(sys.executable, sys.executable, *sys.argv)
+                else:
+                    QMessageBox.critical(self, "Güncelleme", "Güncelleme indirilemedi!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

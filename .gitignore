@@ -33,3 +33,6 @@ number.txt
 messages.txt
 # Compiled files
 *.zip
+
+# Backup files
+Numaralar.csv

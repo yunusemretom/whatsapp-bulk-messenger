@@ -21,6 +21,24 @@ from time import sleep
 import time
 from PySide6.QtWidgets import QInputDialog
 from GUI_RELEASE import Ui_MainWindow  # Dönüştürülen UI dosyası
+import csv
+import re
+
+def load_numbers_from_csv(csv_path):
+    numbers = []
+    with open(csv_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            for cell in row:
+                cell = cell.strip().replace(" ", "")
+                # + ile başlıyorsa baştaki + işaretini kaldır
+                if cell.startswith("+"):
+                    cell = cell[1:]
+                # Sadece rakamlardan oluşan ve 8-15 haneli olanları al (ülke kodu başta olacak şekilde)
+                if re.fullmatch(r"\d{8,15}", cell):
+                    numbers.append(cell)
+    return numbers
+
 
 class WhatsAppSenderThread(QThread):
     progress_update = Signal(int, str)  # İlerleme durumu için sinyal
@@ -466,19 +484,19 @@ class MainApp(QMainWindow):
             self.log_status(f"Numara silindi: {item.text()}")
     
     def import_numbers(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Numara Listesi İçe Aktar", "", "Metin Dosyaları (*.txt)")
+        file_path, _ = QFileDialog.getOpenFileName(self, "Numara Listesi İçe Aktar", "", "CSV Dosyaları (*.csv);;Metin Dosyaları (*.txt)")
         if not file_path:
             return
-            
         try:
-            with open(file_path, "r") as f:
-                new_numbers = [line.strip() for line in f.readlines() if line.strip()]
-                
-                self.numbers.extend(new_numbers)
-                self.ui.numbersList.clear()
-                self.ui.numbersList.addItems(new_numbers)
-                
-                self.log_status(f"{len(new_numbers)} numara içe aktarıldı.")
+            if file_path.endswith('.csv'):
+                new_numbers = load_numbers_from_csv(file_path)
+            else:
+                with open(file_path, "r") as f:
+                    new_numbers = [line.strip() for line in f.readlines() if line.strip()]
+            self.numbers.extend(new_numbers)
+            self.ui.numbersList.clear()
+            self.ui.numbersList.addItems(new_numbers)
+            self.log_status(f"{len(new_numbers)} numara içe aktarıldı.")
         except Exception as e:
             QMessageBox.critical(self, "Hata", f"Dosya içe aktarılırken hata oluştu: {str(e)}")
     

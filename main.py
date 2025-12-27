@@ -23,6 +23,13 @@ from PySide6.QtWidgets import QInputDialog
 from GUI_RELEASE import Ui_MainWindow  # Dönüştürülen UI dosyası
 import csv
 import re
+import os
+from pathlib import Path
+import pyautogui
+import pyperclip
+
+base_dir = Path.home() / "selenium_chrome_profile"
+base_dir.mkdir(parents=True, exist_ok=True)
 
 def load_numbers_from_csv(csv_path):
     numbers = []
@@ -72,8 +79,9 @@ class WhatsAppSenderThread(QThread):
         try:
             options = Options()
             options.add_experimental_option("excludeSwitches", ["enable-logging"])
-            options.add_argument("--profile-directory=Default")
-            options.add_argument("--user-data-dir=/var/tmp/chrome_user_data")
+            
+            
+            options.add_argument(f"--user-data-dir={base_dir}")
             options.add_argument('--start-maximized')
             options.add_argument("--disable-background-timer-throttling")
             options.add_argument("--disable-renderer-backgrounding")
@@ -168,29 +176,39 @@ class WhatsAppSenderThread(QThread):
                             # Daha esnek bir yaklaşım kullanarak input elementini bul
                             try:
                                 # İlk deneme: Orijinal seçici
-                                image_box = WebDriverWait(self.driver, 5).until(
-                                    EC.presence_of_element_located((By.XPATH, "//input[@accept='image/*,video/mp4,video/3gpp,video/quicktime']"))
+                                image_box = WebDriverWait(self.driver, 10).until(
+                                    EC.element_to_be_clickable((
+                                        By.XPATH,
+                                        "//li[@role='button']//span[text()='Fotoğraflar ve Videolar']"
+                                    ))
                                 )
-                                print("bu")
+                                image_box.click()
+                                time.sleep(1.5) 
 
-                            except:
-                                try:
-                                    # İkinci deneme: Değişmiş seçici
-                                    image_box = WebDriverWait(self.driver, 5).until(
-                                        EC.presence_of_element_located((By.XPATH, "//input[@accept='*']"))
-                                    )
+                                # 3. Dosya yolunu klavye ile yazdır ve Enter'a basfrom pathlib import Path
 
-                                except:
-                                    # Üçüncü deneme: Daha genel bir seçici
-                                    image_box = WebDriverWait(self.driver, 5).until(
-                                        EC.presence_of_element_located((By.XPATH, "//input[@type='file']"))
-                                    )
+                                path = Path(media_file)
+                                dosya_yolu = rf"{str(path)}"
+
+                                text = f'"{dosya_yolu}"'
+                                pyperclip.copy(text)
+                                pyautogui.hotkey("ctrl", "v")
+                                time.sleep(0.5)
+                                print(f"Yapıştırıldı: {text}")
+                                pyautogui.press('enter')
+
+                            except Exception as e:
+                                self.log_status(f"Medya yükleme hatası: {str(e)}")
+                                continue
+                                
                             
                             # Dosyayı yükle
                             print(f"Yükleniyor: {media_file}")
-                            image_box.send_keys(media_file)
-                            time.sleep(self.wait)
-                            
+                            try:
+                                image_box.send_keys(media_file)
+                                time.sleep(self.wait)
+                            except:
+                                pass
                             # Medya mesajını gönder
                             if media_file in self.media_messages and self.media_messages[media_file]:
                                 message_box = WebDriverWait(self.driver, self.delay).until(

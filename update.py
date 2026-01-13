@@ -1,11 +1,26 @@
+import re
+
 import requests
+from requests.exceptions import RequestException
+
+
+def parse_version(version):
+    parts = re.findall(r"\d+", version)
+    return tuple(int(part) for part in parts) if parts else (0,)
 
 def check_version(current_version):
     url = "https://raw.githubusercontent.com/yunusemretom/whatsapp-bulk-messenger/primary/version.txt"
-    remote_version = requests.get(url).text.strip()
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+    except RequestException as exc:
+        print(f"Güncelleme kontrolü başarısız: {exc}")
+        return False
+
+    remote_version = response.text.strip()
     print(f"Yerel sürüm: {current_version}, Uzak sürüm: {remote_version}")
 
-    if current_version <= remote_version:
+    if parse_version(remote_version) > parse_version(current_version):
         print("Yeni güncelleme var!")
         with open("version.txt", "w", encoding="utf-8") as f:
             f.write(remote_version)
@@ -29,17 +44,25 @@ def get_local_version(file_path="version.txt"):
 
 def download_latest():
     download_url = "https://raw.githubusercontent.com/yunusemretom/whatsapp-bulk-messenger/primary/main.py"
-    
-    r = requests.get(download_url)
+    try:
+        response = requests.get(download_url, timeout=10)
+        response.raise_for_status()
+    except RequestException as exc:
+        print(f"Güncelleme indirilemedi: {exc}")
+        return False
+
     with open("main.py", "w", encoding="utf-8") as f:
-        f.write(r.text)
+        f.write(response.text)
     print("Yeni sürüm indirildi.")
+    return True
 
 
 
 if __name__ == "__main__":
     version = get_local_version()
-    if version and check_version(version):
+    if not version:
+        print("Yerel sürüm okunamadığı için güncelleme kontrolü atlandı.")
+    elif check_version(version):
         print("Güncelleme mevcut, indiriliyor...")
         download_latest()
     else:

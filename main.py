@@ -175,13 +175,23 @@ class WhatsAppSenderThread(QThread):
                             time.sleep(1)  # Menü açılmasını bekle
                             # Daha esnek bir yaklaşım kullanarak input elementini bul
                             try:
-                                # İlk deneme: Türkçe ve İngilizce etiketleri destekle
-                                image_box = WebDriverWait(self.driver, 10).until(
-                                    EC.element_to_be_clickable((
-                                        By.XPATH,
-                                        "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
-                                    ))
-                                )
+                                # İlk deneme: div[@role='menuitem'] ile Türkçe ve İngilizce etiketleri destekle
+                                image_box = None
+                                try:
+                                    image_box = WebDriverWait(self.driver, 5).until(
+                                        EC.element_to_be_clickable((
+                                            By.XPATH,
+                                            "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
+                                        ))
+                                    )
+                                except:
+                                    # div bulunamazsa, aria-label'a sahip herhangi bir elemente tıkla
+                                    image_box = WebDriverWait(self.driver, 5).until(
+                                        EC.element_to_be_clickable((
+                                            By.XPATH,
+                                            "//*[@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
+                                        ))
+                                    )
                                 image_box.click()
                                 time.sleep(1.5) 
 

@@ -179,7 +179,7 @@ class WhatsAppSenderThread(QThread):
                                 image_box = WebDriverWait(self.driver, 10).until(
                                     EC.element_to_be_clickable((
                                         By.XPATH,
-                                        "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos']"
+                                        "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
                                     ))
                                 )
                                 image_box.click()

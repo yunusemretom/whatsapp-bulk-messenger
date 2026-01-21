@@ -175,11 +175,11 @@ class WhatsAppSenderThread(QThread):
                                 
                             # Daha esnek bir yaklaşım kullanarak input elementini bul
                             try:
-                                # İlk deneme: Orijinal seçici
+                                # İlk deneme: Türkçe ve İngilizce etiketleri destekle
                                 image_box = WebDriverWait(self.driver, 10).until(
                                     EC.element_to_be_clickable((
                                         By.XPATH,
-                                        "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar']"
+                                        "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos']"
                                     ))
                                 )
                                 image_box.click()

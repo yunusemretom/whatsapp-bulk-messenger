@@ -178,20 +178,29 @@ class WhatsAppSenderThread(QThread):
                                 # İlk deneme: div[@role='menuitem'] ile Türkçe ve İngilizce etiketleri destekle
                                 image_box = None
                                 try:
-                                    image_box = WebDriverWait(self.driver, 5).until(
+                                    image_box = WebDriverWait(self.driver, 3).until(
                                         EC.element_to_be_clickable((
                                             By.XPATH,
-                                            "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
+                                "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
                                         ))
                                     )
                                 except:
-                                    # div bulunamazsa, aria-label'a sahip herhangi bir elemente tıkla
-                                    image_box = WebDriverWait(self.driver, 5).until(
-                                        EC.element_to_be_clickable((
-                                            By.XPATH,
-                                            "//*[@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
-                                        ))
-                                    )
+                                    try:
+                                        # div bulunamazsa, aria-label'a sahip herhangi bir elemente tıkla
+                                        image_box = WebDriverWait(self.driver, 3).until(
+                                            EC.element_to_be_clickable((
+                                                By.XPATH,
+                                                "//*[@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
+                                            ))
+                                        )
+                                    except:
+                                        # Son çare: span içindeki metne göre bul
+                                        image_box = WebDriverWait(self.driver, 3).until(
+                                            EC.element_to_be_clickable((
+                                                By.XPATH,
+                                                "//span[contains(text(), 'Photos') or contains(text(), 'videos') or contains(text(), 'Fotoğraflar') or contains(text(), 'Videolar')]"
+                                            ))
+                                        )
                                 image_box.click()
                                 time.sleep(1.5) 
 

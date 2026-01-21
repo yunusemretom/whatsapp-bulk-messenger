@@ -172,7 +172,7 @@ class WhatsAppSenderThread(QThread):
                                     EC.element_to_be_clickable((By.XPATH, "//span[@data-icon='plus-rounded']"))
                                 )
                                 attach_button.click()
-                                
+                            time.sleep(1)  # Menü açılmasını bekle
                             # Daha esnek bir yaklaşım kullanarak input elementini bul
                             try:
                                 # İlk deneme: Türkçe ve İngilizce etiketleri destekle

@@ -11,6 +11,10 @@ __pycache__/
 venv/
 env/
 ENV/
+node_modules/
+.wwebjs_cache/
+.wwebjs_auth/
+
 
 # IDE specific files
 .idea/
@@ -34,5 +38,7 @@ messages.txt
 # Compiled files
 *.zip
 
+
 # Backup files
 Numaralar.csv
+

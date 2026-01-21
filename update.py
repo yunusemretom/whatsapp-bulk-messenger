@@ -59,11 +59,6 @@ def download_latest():
 
 
 if __name__ == "__main__":
-    version = get_local_version()
-    if not version:
-        print("Yerel sürüm okunamadığı için güncelleme kontrolü atlandı.")
-    elif check_version(version):
-        print("Güncelleme mevcut, indiriliyor...")
-        download_latest()
-    else:
-        print("Güncelleme gerekli değil.")
+       
+    print("Güncelleme mevcut, indiriliyor...")
+    download_latest()

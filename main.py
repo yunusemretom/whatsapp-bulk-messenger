@@ -174,66 +174,68 @@ class WhatsAppSenderThread(QThread):
                                 attach_button.click()
                             time.sleep(1)  # Menü açılmasını bekle
                             # Daha esnek bir yaklaşım kullanarak input elementini bul
+                            
                             try:
                                 # İlk deneme: div[@role='menuitem'] ile Türkçe ve İngilizce etiketleri destekle
                                 image_box = None
-                                try:
-                                    image_box = WebDriverWait(self.driver, 3).until(
-                                        EC.element_to_be_clickable((
-                                            By.XPATH,
-                                "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
-                                        ))
-                                    )
-                                except:
+                                if i == 0:
                                     try:
-                                        # div bulunamazsa, aria-label'a sahip herhangi bir elemente tıkla
                                         image_box = WebDriverWait(self.driver, 3).until(
                                             EC.element_to_be_clickable((
                                                 By.XPATH,
-                                                "//*[@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
+                                    "//div[@role='menuitem'][@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
                                             ))
                                         )
                                     except:
-                                        # Son çare: span içindeki metne göre bul
-                                        image_box = WebDriverWait(self.driver, 3).until(
-                                            EC.element_to_be_clickable((
-                                                By.XPATH,
-                                                "//span[contains(text(), 'Photos') or contains(text(), 'videos') or contains(text(), 'Fotoğraflar') or contains(text(), 'Videolar')]"
-                                            ))
-                                        )
-                                image_box.click()
-                                time.sleep(1.5) 
+                                        try:
+                                            # div bulunamazsa, aria-label'a sahip herhangi bir elemente tıkla
+                                            image_box = WebDriverWait(self.driver, 3).until(
+                                                EC.element_to_be_clickable((
+                                                    By.XPATH,
+                                                    "//*[@aria-label='Fotoğraflar ve Videolar' or @aria-label='Photos and videos' or @aria-label='Photos & videos']"
+                                                ))
+                                            )
+                                        except:
+                                            # Son çare: span içindeki metne göre bul
+                                            image_box = WebDriverWait(self.driver, 3).until(
+                                                EC.element_to_be_clickable((
+                                                    By.XPATH,
+                                                    "//span[contains(text(), 'Photos') or contains(text(), 'videos') or contains(text(), 'Fotoğraflar') or contains(text(), 'Videolar')]"
+                                                ))
+                                            )
+                                    image_box.click()
+                                    time.sleep(1.5) 
 
                                 # 3. Dosya yolunu klavye ile yazdır ve Enter'a basfrom pathlib import Path
 
                                 path = Path(media_file)
-                                dosya_yolu = rf"{str(path)}"
+                                dosya_yolu = rf"{str(path)}"+" "
 
                                 text = f'"{dosya_yolu}"'
                                 pyperclip.copy(text)
                                 pyautogui.hotkey("ctrl", "v")
                                 time.sleep(0.5)
                                 print(f"Yapıştırıldı: {text}")
-                                pyautogui.press('enter')
+                                
 
                             except Exception as e:
                                 self.log_status(f"Medya yükleme hatası: {str(e)}")
                                 continue
                                 
-                            
-                            # Dosyayı yükle
-                            print(f"Yükleniyor: {media_file}")
-                            try:
-                                image_box.send_keys(media_file)
-                                time.sleep(self.wait)
-                            except:
-                                pass
-                            # Medya mesajını gönder
-                            if media_file in self.media_messages and self.media_messages[media_file]:
-                                message_box = WebDriverWait(self.driver, self.delay).until(
-                                    EC.presence_of_element_located((By.XPATH, "//div[@role='textbox']"))
-                                )
-                                message_box.send_keys(self.media_messages[media_file])
+                        pyautogui.press('enter')
+                        # Dosyayı yükle
+                        print(f"Yükleniyor: {media_file}")
+                        try:
+                            image_box.send_keys(media_file)
+                            time.sleep(self.wait)
+                        except:
+                            pass
+                        # Medya mesajını gönder
+                        if media_file in self.media_messages and self.media_messages[media_file]:
+                            message_box = WebDriverWait(self.driver, self.delay).until(
+                                EC.presence_of_element_located((By.XPATH, "//div[@role='textbox']"))
+                            )
+                            message_box.send_keys(self.media_messages[media_file])
                         
                         # Medya dosyalarını gönder
                         send_button = WebDriverWait(self.driver, self.delay).until(
